@@ -1,0 +1,52 @@
+{
+  "name": "markdown-it-desmos",
+  "version": "0.0.1-alpha.1",
+  "description": "Support Desmos graph in Markdown-It with Vite",
+  "author": "Midori Kurage <tonygong233@gmail.com>",
+  "license": "GPL-3.0",
+  "bugs": "https://github.com/mdrkrg/vite-plugin-desmos/issues",
+  "homepage": "https://github.com/mdrkrg/vite-plugin-desmos#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdrkrg/vite-plugin-desmos"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "vite-plugin",
+    "markdown-it",
+    "markdown",
+    "obsidian",
+    "desmos"
+  ],
+  "type": "module",
+  "main": "dist/mdit-desmos.cjs",
+  "module": "dist/mdit-desmos.js",
+  "exports": {
+    ".": {
+      "import": "./dist/mdit-desmos.js",
+      "require": "./dist/mdit-desmos.cjs"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vitest",
+    "test": "vitest --run --silent=false"
+  },
+  "peerDependencies": {
+    "markdown-it": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.0.1",
+    "jsdom": "^25.0.1",
+    "node": "^20.18.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "mathjs": "^13.2.0"
+  }
+}

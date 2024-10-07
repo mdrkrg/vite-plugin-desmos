@@ -7,105 +7,105 @@ import { ucast } from './utils';
 // import { renderDesmosInstance } from './desmos';
 
 export default function mdItDesmos(md: MarkdownIt): Plugin {
-    // const renderer = new Renderer();
-    md.core.ruler.after('block', 'desmos-graph', (state) => {
-        const tokens = state.tokens;
-        // let desmosExist = false;
-        for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            if (token.type === 'fence' && token.info.trim() === 'desmos-graph') {
-                // desmosExist = true;
-                const source = token.content;
-                token.type = 'desmos_graph';
-                token.attrPush(['data-graph', source]);
-                token.attrPush(['class', 'desmos-graph']);
-            }
+  // const renderer = new Renderer();
+  md.core.ruler.after('block', 'desmos-graph', (state) => {
+    const tokens = state.tokens;
+    // let desmosExist = false;
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      if (token.type === 'fence' && token.info.trim() === 'desmos-graph') {
+        // desmosExist = true;
+        const source = token.content;
+        token.type = 'desmos_graph';
+        token.attrPush(['data-graph', source]);
+        token.attrPush(['class', 'desmos-graph']);
+      }
+    }
+  });
+
+  md.renderer.rules.desmos_graph = function(tokens, idx) {
+    const token = tokens[idx];
+    const source = token.content
+    const graph = Graph.parse(source);
+    // Parse equations into a series of Desmos expressions
+    const expressions: any[] = [];
+    const graphSettings = graph.settings;
+    for (const equation of graph.equations) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const expression: any = {
+        color: equation.color,
+        label: equation.label,
+        hidden: equation.hidden,
+        showLabel: equation.label !== undefined,
+        lines: equation.line,
+      };
+
+      if (equation.restrictions) {
+        const restriction = equation.restrictions
+          .map((restriction) =>
+            `{${restriction}}`
+              // Escape chars
+              .replaceAll("{", String.raw`\{`)
+              .replaceAll("}", String.raw`\}`)
+              .replaceAll("<=", String.raw`\leq `)
+              .replaceAll(">=", String.raw`\geq `)
+              .replaceAll("<", String.raw`\le `)
+              .replaceAll(">", String.raw`\ge `)
+          )
+          .join("");
+
+        expression.latex = `${equation.equation}${restriction}`;
+      } else {
+        expression.latex = equation.equation;
+      }
+
+      if (equation.style) {
+        if (Object.values(LineStyle).includes(ucast(equation.style))) {
+          expression.lineStyle = equation.style;
+        } else if (Object.values(PointStyle).includes(ucast(equation.style))) {
+          expression.pointStyle = equation.style;
         }
-    });
+      }
 
-    md.renderer.rules.desmos_graph = function(tokens, idx) {
-        const token = tokens[idx];
-        const source = token.content
-        const graph = Graph.parse(source);
-        // Parse equations into a series of Desmos expressions
-        const expressions: any[] = [];
-        const graphSettings = graph.settings;
-        for (const equation of graph.equations) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const expression: any = {
-                color: equation.color,
-                label: equation.label,
-                hidden: equation.hidden,
-                showLabel: equation.label !== undefined,
-                lines: equation.line,
-            };
-
-            if (equation.restrictions) {
-                const restriction = equation.restrictions
-                    .map((restriction) =>
-                        `{${restriction}}`
-                            // Escape chars
-                            .replaceAll("{", String.raw`\{`)
-                            .replaceAll("}", String.raw`\}`)
-                            .replaceAll("<=", String.raw`\leq `)
-                            .replaceAll(">=", String.raw`\geq `)
-                            .replaceAll("<", String.raw`\le `)
-                            .replaceAll(">", String.raw`\ge `)
-                    )
-                    .join("");
-
-                expression.latex = `${equation.equation}${restriction}`;
-            } else {
-                expression.latex = equation.equation;
-            }
-
-            if (equation.style) {
-                if (Object.values(LineStyle).includes(ucast(equation.style))) {
-                    expression.lineStyle = equation.style;
-                } else if (Object.values(PointStyle).includes(ucast(equation.style))) {
-                    expression.pointStyle = equation.style;
-                }
-            }
-
-            expressions.push(expression);
-        }
-
-        const options = {
-            settingsMenu: false,
-            expressions: false,
-            lockViewPort: true,
-            zoomButtons: false,
-            trace: false,
-            xAxisNumbers: !graphSettings.hideAxisNumbers,
-            yAxisNumbers: !graphSettings.hideAxisNumbers,
-            showGrid: graphSettings.grid,
-            // Desmos takes a value of 'false' for radians and 'true' for degrees
-            degreeMode: graphSettings.degreeMode === DegreeMode.Degrees,
-        };
-
-        if (graphSettings.xAxisLabel !== undefined) {
-            options.xAxisLabel = JSON.stringify(graphSettings.xAxisLabel ?? "").slice(1, -1);
-        }
-
-        if (graphSettings.yAxisLabel !== undefined) {
-            options.yAxisLabel = JSON.stringify(graphSettings.yAxisLabel ?? "").slice(1, -1);
-        }
-
-        options.xAxisScale = graphSettings.xAxisLogarithmic ? "logarithmic" : "linear";
-        options.yAxisScale = graphSettings.yAxisLogarithmic ? "logarithmic" : "linear";
-
-        return `<div id="desmos-${idx}" class="desmos-graph" style="width: ${graphSettings.width}px; height: ${graphSettings.height
-            }px;" data-desmos-expressions='${JSON.stringify(expressions)
-            }' data-desmos-options='${JSON.stringify(options)
-            }' data-desmos-bounds='${JSON.stringify({
-                left: graphSettings.left,
-                right: graphSettings.right,
-                top: graphSettings.top,
-                bottom: graphSettings.bottom,
-            })}'></div>`
+      expressions.push(expression);
     }
 
-    const htmlScript = `
+    const options = {
+      settingsMenu: false,
+      expressions: false,
+      lockViewPort: true,
+      zoomButtons: false,
+      trace: false,
+      xAxisNumbers: !graphSettings.hideAxisNumbers,
+      yAxisNumbers: !graphSettings.hideAxisNumbers,
+      showGrid: graphSettings.grid,
+      // Desmos takes a value of 'false' for radians and 'true' for degrees
+      degreeMode: graphSettings.degreeMode === DegreeMode.Degrees,
+    };
+
+    if (graphSettings.xAxisLabel !== undefined) {
+      options.xAxisLabel = JSON.stringify(graphSettings.xAxisLabel ?? "").slice(1, -1);
+    }
+
+    if (graphSettings.yAxisLabel !== undefined) {
+      options.yAxisLabel = JSON.stringify(graphSettings.yAxisLabel ?? "").slice(1, -1);
+    }
+
+    options.xAxisScale = graphSettings.xAxisLogarithmic ? "logarithmic" : "linear";
+    options.yAxisScale = graphSettings.yAxisLogarithmic ? "logarithmic" : "linear";
+
+    return `<div id="desmos-${idx}" class="desmos-graph" style="width: ${graphSettings.width}px; height: ${graphSettings.height
+      }px;" data-desmos-expressions='${JSON.stringify(expressions)
+      }' data-desmos-options='${JSON.stringify(options)
+      }' data-desmos-bounds='${JSON.stringify({
+        left: graphSettings.left,
+        right: graphSettings.right,
+        top: graphSettings.top,
+        bottom: graphSettings.bottom,
+      })}'></div>`
+  }
+
+  const htmlScript = `
 document.addEventListener('DOMContentLoaded', () => {
   // Observe DOM mutation
   const observer = new MutationObserver(mutations => {
@@ -168,31 +168,31 @@ document.addEventListener('DOMContentLoaded', () => {
   observer.observe(targetNode, config);
 });
 `
-    // md.renderer.rules.desmos_script = function() {
-    //     return htmlScript
-    // }
+  // md.renderer.rules.desmos_script = function() {
+  //     return htmlScript
+  // }
 
-    return {
-        name: 'markdown-it-desmos',
-        enforce: 'post',
-        transformIndexHtml() {
-            // Inject scripts
-            return [{
-                tag: 'script',
-                attrs: {
-                    id: 'desmos-api',
-                    src: 'https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6',
-                },
-                injectTo: 'head',
-            },
-            {
-                tag: 'script',
-                children: htmlScript,
-                attrs: {
-                    id: 'desmos-script',
-                },
-                injectTo: 'body',
-            }]
+  return {
+    name: 'vite-plugin-desmos',
+    enforce: 'post',
+    transformIndexHtml() {
+      // Inject scripts
+      return [{
+        tag: 'script',
+        attrs: {
+          id: 'desmos-api',
+          src: 'https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6',
         },
-    }
+        injectTo: 'head',
+      },
+      {
+        tag: 'script',
+        children: htmlScript,
+        attrs: {
+          id: 'desmos-script',
+        },
+        injectTo: 'body',
+      }]
+    },
+  }
 }

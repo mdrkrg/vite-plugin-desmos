@@ -1,5 +1,5 @@
 {
-  "name": "markdown-it-desmos",
+  "name": "vite-plugin-desmos",
   "version": "0.0.1-alpha.1",
   "description": "Support Desmos graph in Markdown-It with Vite",
   "author": "Midori Kurage <tonygong233@gmail.com>",
@@ -22,12 +22,12 @@
     "desmos"
   ],
   "type": "module",
-  "main": "dist/mdit-desmos.cjs",
-  "module": "dist/mdit-desmos.js",
+  "main": "dist/vite-plugin-desmos.cjs",
+  "module": "dist/vite-plugin-desmos.js",
   "exports": {
     ".": {
-      "import": "./dist/mdit-desmos.js",
-      "require": "./dist/mdit-desmos.cjs"
+      "import": "./dist/vite-plugin-desmos.js",
+      "require": "./dist/vite-plugin-desmos.cjs"
     }
   },
   "scripts": {

@@ -120,4 +120,4 @@ document.addEventListener('DOMContentLoaded', () => {
   const config = { childList: true, subtree: true }; // observe child node
   observer.observe(targetNode, config);
 });
-`;return{name:"markdown-it-desmos",enforce:"post",transformIndexHtml(){return[{tag:"script",attrs:{id:"desmos-api",src:"https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"},injectTo:"head"},{tag:"script",children:r,attrs:{id:"desmos-script"},injectTo:"body"}]}}}module.exports=kF;
+`;return{name:"vite-plugin-desmos",enforce:"post",transformIndexHtml(){return[{tag:"script",attrs:{id:"desmos-api",src:"https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"},injectTo:"head"},{tag:"script",children:r,attrs:{id:"desmos-script"},injectTo:"body"}]}}}module.exports=kF;

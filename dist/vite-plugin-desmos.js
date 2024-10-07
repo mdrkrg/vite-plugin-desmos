@@ -30344,7 +30344,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 `;
   return {
-    name: "markdown-it-desmos",
+    name: "vite-plugin-desmos",
     enforce: "post",
     transformIndexHtml() {
       return [
